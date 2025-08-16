@@ -1,0 +1,38 @@
+-- Script para tocar música em loop, aplicar adesivo aos blocos e mudar o céu
+local musicaID = 76578817848504
+local adesivoID = 18989906420
+local ceuID = 8808550143
+
+-- Toca a música em loop
+local som = Instance.new("Sound", workspace)
+som.SoundId = "rbxassetid://" .. musicaID
+som.Looped = true
+som:Play()
+
+-- Aplica o adesivo a todos os blocos da workspace
+game:GetService("Workspace"):DescendantAdded:Connect(function(part)
+    if part:IsA("BasePart") then
+        local decal = Instance.new("Decal", part)
+        decal.Texture = "rbxassetid://" .. adesivoID
+        decal.Face = "Top" -- Pode alterar para "Bottom", "Front", "Back", "Left", "Right"
+    end
+end)
+
+-- Altera o céu
+local lighting = game:GetService("Lighting")
+local novoCeu = Instance.new("Sky", lighting)
+novoCeu.SkyboxFt = "rbxassetid://" .. ceuID
+novoCeu.SkyboxBk = "rbxassetid://" .. ceuID
+novoCeu.SkyboxLf = "rbxassetid://" .. ceuID
+novoCeu.SkyboxRt = "rbxassetid://" .. ceuID
+novoCeu.SkyboxUp = "rbxassetid://" .. ceuID
+novoCeu.SkyboxDn = "rbxassetid://" .. ceuID
+
+-- Aplica para blocos existentes
+for _, part in ipairs(workspace:GetDescendants()) do
+    if part:IsA("BasePart") then
+        local decal = Instance.new("Decal", part)
+        decal.Texture = "rbxassetid://" .. adesivoID
+        decal.Face = "Top"
+    end
+end
