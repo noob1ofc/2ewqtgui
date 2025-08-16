@@ -1,38 +1,74 @@
--- Script para tocar música em loop, aplicar adesivo aos blocos e mudar o céu
-local musicaID = 76578817848504
-local adesivoID = 18989906420
-local ceuID = 8808550143
+-- sh0peegui inicial
+local player = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui")
+gui.Name = "sh0peegui"
+gui.ResetOnSpawn = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.Parent = player:WaitForChild("PlayerGui")
 
--- Toca a música em loop
-local som = Instance.new("Sound", workspace)
-som.SoundId = "rbxassetid://" .. musicaID
-som.Looped = true
-som:Play()
+-- fundo vermelho
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(1, 0, 1, 0)
+mainFrame.Position = UDim2.new(0, 0, 0, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = gui
 
--- Aplica o adesivo a todos os blocos da workspace
-game:GetService("Workspace"):DescendantAdded:Connect(function(part)
-    if part:IsA("BasePart") then
-        local decal = Instance.new("Decal", part)
-        decal.Texture = "rbxassetid://" .. adesivoID
-        decal.Face = "Top" -- Pode alterar para "Bottom", "Front", "Back", "Left", "Right"
-    end
+-- título
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0.15, 0)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "sh0peegui"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.Font = Enum.Font.Arcade
+title.TextScaled = true
+title.Parent = mainFrame
+
+-- botão INFECT
+local button1 = Instance.new("TextButton")
+button1.Size = UDim2.new(0.3, 0, 0.1, 0)
+button1.Position = UDim2.new(0.35, 0, 0.3, 0)
+button1.BackgroundColor3 = Color3.new(0, 0, 0)
+button1.TextColor3 = Color3.new(1, 0, 0)
+button1.Font = Enum.Font.Arcade
+button1.TextScaled = true
+button1.Text = "INFECT"
+button1.Parent = mainFrame
+
+button1.MouseButton1Click:Connect(function()
+	-- Música
+	local music = Instance.new("Sound", game.Workspace)
+	music.SoundId = "rbxassetid://1839246711"
+	music.Looped = true
+	music.Volume = 2
+	music:Play()
+
+	-- Adesivo em todos os blocos
+	for _, obj in pairs(workspace:GetDescendants()) do
+		if obj:IsA("BasePart") and not obj:FindFirstChild("sh0peeDecal") then
+			local decal = Instance.new("Decal")
+			decal.Name = "sh0peeDecal"
+			decal.Texture = "rbxassetid://18989906420"
+			decal.Face = Enum.NormalId.Front
+			decal.Parent = obj
+		end
+	end
+
+	-- Céu maldito
+	local lighting = game:GetService("Lighting")
+	for _, obj in pairs(lighting:GetChildren()) do
+		if obj:IsA("Sky") then
+			obj:Destroy()
+		end
+	end
+
+	local sky = Instance.new("Sky")
+	sky.SkyboxBk = "rbxassetid://8808550143"
+	sky.SkyboxDn = "rbxassetid://8808550143"
+	sky.SkyboxFt = "rbxassetid://8808550143"
+	sky.SkyboxLf = "rbxassetid://8808550143"
+	sky.SkyboxRt = "rbxassetid://8808550143"
+	sky.SkyboxUp = "rbxassetid://8808550143"
+	sky.Parent = lighting
 end)
-
--- Altera o céu
-local lighting = game:GetService("Lighting")
-local novoCeu = Instance.new("Sky", lighting)
-novoCeu.SkyboxFt = "rbxassetid://" .. ceuID
-novoCeu.SkyboxBk = "rbxassetid://" .. ceuID
-novoCeu.SkyboxLf = "rbxassetid://" .. ceuID
-novoCeu.SkyboxRt = "rbxassetid://" .. ceuID
-novoCeu.SkyboxUp = "rbxassetid://" .. ceuID
-novoCeu.SkyboxDn = "rbxassetid://" .. ceuID
-
--- Aplica para blocos existentes
-for _, part in ipairs(workspace:GetDescendants()) do
-    if part:IsA("BasePart") then
-        local decal = Instance.new("Decal", part)
-        decal.Texture = "rbxassetid://" .. adesivoID
-        decal.Face = "Top"
-    end
-end
