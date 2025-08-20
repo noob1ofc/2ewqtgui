@@ -1,74 +1,88 @@
--- sh0peegui inicial
-local player = game.Players.LocalPlayer
-local gui = Instance.new("ScreenGui")
-gui.Name = "sh0peegui"
-gui.ResetOnSpawn = false
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-gui.Parent = player:WaitForChild("PlayerGui")
+--particulas
+local InsertService = game:GetService("InsertService")
 
--- fundo vermelho
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(1, 0, 1, 0)
-mainFrame.Position = UDim2.new(0, 0, 0, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-mainFrame.BorderSizePixel = 0
-mainFrame.Parent = gui
+-- ID do seu ParticleEmitter exportado
+local PARTICLE_ID = 127978175466497
 
--- título
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0.15, 0)
-title.Position = UDim2.new(0, 0, 0, 0)
-title.BackgroundTransparency = 1
-title.Text = "sh0peegui"
-title.TextColor3 = Color3.new(1, 1, 1)
-title.Font = Enum.Font.Arcade
-title.TextScaled = true
-title.Parent = mainFrame
+game.Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(function(character)
+		local head = character:WaitForChild("Head")
 
--- botão INFECT
-local button1 = Instance.new("TextButton")
-button1.Size = UDim2.new(0.3, 0, 0.1, 0)
-button1.Position = UDim2.new(0.35, 0, 0.3, 0)
-button1.BackgroundColor3 = Color3.new(0, 0, 0)
-button1.TextColor3 = Color3.new(1, 0, 0)
-button1.Font = Enum.Font.Arcade
-button1.TextScaled = true
-button1.Text = "INFECT"
-button1.Parent = mainFrame
+		-- Carrega o ParticleEmitter do asset
+		local success, asset = pcall(function()
+			return InsertService:LoadAsset(PARTICLE_ID)
+		end)
 
-button1.MouseButton1Click:Connect(function()
-	-- Música
-	local music = Instance.new("Sound", game.Workspace)
-	music.SoundId = "rbxassetid://1839246711"
-	music.Looped = true
-	music.Volume = 2
-	music:Play()
+		if success and asset then
+			local particle = asset:FindFirstChildWhichIsA("ParticleEmitter", true)
+			if particle then
+				local clone = particle:Clone()
 
-	-- Adesivo em todos os blocos
-	for _, obj in pairs(workspace:GetDescendants()) do
-		if obj:IsA("BasePart") and not obj:FindFirstChild("sh0peeDecal") then
-			local decal = Instance.new("Decal")
-			decal.Name = "sh0peeDecal"
-			decal.Texture = "rbxassetid://18989906420"
-			decal.Face = Enum.NormalId.Front
-			decal.Parent = obj
+				-- 🔥 Configurações adicionais
+				clone.Lifetime = NumberRange.new(2, 9) -- tempo de vida (mín, máx)
+				clone.Speed = NumberRange.new(3, 10)    -- velocidade (mín, máx)
+				clone.Size = NumberSequence.new({
+					NumberSequenceKeypoint.new(0, 0.100), -- começa pequeno
+					NumberSequenceKeypoint.new(0.100, 1.5), -- cresce no meio
+					NumberSequenceKeypoint.new(1, 0)    -- some no final
+				})
+
+				clone.Rate = 100 -- partículas por segundo
+				clone.Parent = head
+			end
+			asset:Destroy()
+		else
+			warn("Falha ao carregar ParticleEmitter: " .. PARTICLE_ID)
 		end
-	end
-
-	-- Céu maldito
-	local lighting = game:GetService("Lighting")
-	for _, obj in pairs(lighting:GetChildren()) do
-		if obj:IsA("Sky") then
-			obj:Destroy()
-		end
-	end
-
-	local sky = Instance.new("Sky")
-	sky.SkyboxBk = "rbxassetid://8808550143"
-	sky.SkyboxDn = "rbxassetid://8808550143"
-	sky.SkyboxFt = "rbxassetid://8808550143"
-	sky.SkyboxLf = "rbxassetid://8808550143"
-	sky.SkyboxRt = "rbxassetid://8808550143"
-	sky.SkyboxUp = "rbxassetid://8808550143"
-	sky.Parent = lighting
+	end)
 end)
+--musica
+local Sound = Instance.new("Sound")
+Sound.Name = "BackgroundMusic"
+Sound.SoundId = "rbxassetid://1839246711"
+Sound.Volume = 1
+Sound.Looped = true -- toca em loop
+Sound.Parent = game.SoundService
+
+Sound:Play()
+--parts
+local TEXTURE_ID = "rbxassetid://136137552420192"
+
+
+local function applyTexture(part)
+	if part:IsA("BasePart") then
+
+		for _, child in ipairs(part:GetChildren()) do
+			if child:IsA("Texture") then
+				child:Destroy()
+			end
+		end
+
+
+		local texture = Instance.new("Texture")
+		texture.Texture = TEXTURE_ID
+		texture.StudsPerTileU = 4 -- ajuste do tamanho horizontal
+		texture.StudsPerTileV = 4 -- ajuste do tamanho vertical
+		texture.Face = Enum.NormalId.Top -- você pode aplicar em uma face específica ou criar 6 faces
+		texture.Parent = part
+	end
+end
+
+for _, part in ipairs(workspace:GetDescendants()) do
+	applyTexture(part)
+end
+
+workspace.DescendantAdded:Connect(function(part)
+	applyTexture(part)
+end)
+--céu
+local sky = Instance.new("Sky")
+
+sky.SkyboxBk = "rbxassetid://136137552420192"
+sky.SkyboxDn = "rbxassetid://136137552420192"
+sky.SkyboxFt = "rbxassetid://136137552420192"
+sky.SkyboxLf = "rbxassetid://136137552420192"
+sky.SkyboxRt = "rbxassetid://136137552420192"
+sky.SkyboxUp = "rbxassetid://136137552420192"
+
+sky.Parent = game.Lighting
